@@ -1,0 +1,8 @@
+# Job inputs
+# Demonstrates: YAFE_INPUT_* environment variables from job inputs
+runs-on: host
+steps:
+  - cmd: |
+      echo "Environment: $YAFE_INPUT_ENVIRONMENT"
+      echo "Version: $YAFE_INPUT_VERSION"
+    kind: shell

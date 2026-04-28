@@ -1,0 +1,1046 @@
+openapi: 3.0.3
+info:
+  title: YaFE API
+  description: REST API for YaFE (Yet another Flow Engine) job queue management.
+  version: rolling
+
+servers:
+  - url: http://localhost:8080
+    description: HTTP server (default)
+
+security:
+  - ApiKeyAuth: []
+  - {}
+
+paths:
+  /api/v1/profile:
+    get:
+      summary: Get current user profile
+      description: |
+        Returns the authenticated user's profile including username and roles.
+        When authentication is not required, returns an empty profile (username="", roles=[]).
+        Use this endpoint to check authentication status.
+      operationId: getProfile
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '401':
+          description: Authentication required but no valid API key provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/jobs:
+    post:
+      summary: Enqueue a new job
+      description: Creates a new job for the specified flow and adds it to the pending queue
+      operationId: enqueueJob
+      tags:
+        - Jobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobEnqueueRequest'
+      responses:
+        '202':
+          description: Job accepted and enqueued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobEnqueueResponse'
+        '400':
+          description: Invalid request body or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Flow not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: List jobs
+      description: Returns a list of jobs, optionally filtered by status. Jobs are sorted by created_at descending (newest first).
+      operationId: listJobs
+      tags:
+        - Jobs
+      parameters:
+        - name: status
+          in: query
+          description: Filter by job status. Can be specified multiple times to include multiple statuses. If not specified, all statuses are returned.
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/JobStatus'
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+        '400':
+          description: Invalid status parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/jobs/{id}:
+    get:
+      summary: Get a job by ID
+      description: Returns the details of a specific job including its current status
+      operationId: getJob
+      tags:
+        - Jobs
+      parameters:
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobWithStatus'
+        '400':
+          description: Job ID is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete a job
+      description: Deletes a job from the queue regardless of its current status
+      operationId: deleteJob
+      tags:
+        - Jobs
+      parameters:
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Job deleted successfully
+        '400':
+          description: Job ID is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/jobs/{id}/logs:
+    get:
+      summary: Get job logs
+      description: Returns the execution logs for a completed job. Logs are only available after the job has finished (done or failed status).
+      operationId: getJobLogs
+      tags:
+        - Jobs
+      parameters:
+        - name: id
+          in: path
+          description: Job ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job logs
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Plain text log output from job execution
+                example: |
+                  [2024-01-15T10:30:05Z] Starting step: hello
+                  Hello, World!
+                  [2024-01-15T10:30:06Z] Step completed: hello (exit code 0)
+        '400':
+          description: Job ID is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Job not found or logs not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '425':
+          description: Job logs not yet available (job is still pending or running)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/flows:
+    get:
+      summary: List all flows
+      description: Returns a list of all flow names in the flows directory
+      operationId: listFlows
+      tags:
+        - Flows
+      responses:
+        '200':
+          description: List of flow names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["my-workflow", "backup-flow", "deploy"]
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/flows/{name}:
+    get:
+      summary: Get a flow by name
+      description: Returns the content of a specific flow file
+      operationId: getFlow
+      tags:
+        - Flows
+      parameters:
+        - name: name
+          in: path
+          description: Flow name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Flow details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowResponse'
+        '400':
+          description: Invalid flow name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Flow not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Add or update a flow
+      description: Creates a new flow or updates an existing one with the provided content
+      operationId: addFlow
+      tags:
+        - Flows
+      parameters:
+        - name: name
+          in: path
+          description: Flow name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddFlowRequest'
+      responses:
+        '201':
+          description: Flow created or updated successfully
+        '400':
+          description: Invalid flow name or missing content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete a flow
+      description: Removes a flow from the flows directory
+      operationId: deleteFlow
+      tags:
+        - Flows
+      parameters:
+        - name: name
+          in: path
+          description: Flow name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Flow deleted successfully
+        '400':
+          description: Invalid flow name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Flow not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/flows/{name}/rename:
+    post:
+      summary: Rename a flow
+      description: Renames an existing flow and updates all schedules that reference it
+      operationId: renameFlow
+      tags:
+        - Flows
+      parameters:
+        - name: name
+          in: path
+          description: Current flow name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameFlowRequest'
+      responses:
+        '204':
+          description: Flow renamed successfully
+        '400':
+          description: Invalid flow name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Flow not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: New flow name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/schedules:
+    get:
+      summary: List all schedules
+      description: Returns a list of all configured schedules with their current state
+      operationId: listSchedules
+      tags:
+        - Schedules
+      responses:
+        '200':
+          description: List of schedules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScheduleResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Scheduler not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create a new schedule
+      description: Creates a new schedule that will trigger jobs based on the specified type and expression
+      operationId: createSchedule
+      tags:
+        - Schedules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduleRequest'
+      responses:
+        '201':
+          description: Schedule created successfully
+        '400':
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Schedule already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Scheduler not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/schedules/{name}:
+    get:
+      summary: Get a schedule by name
+      description: Returns the details of a specific schedule including its next run time
+      operationId: getSchedule
+      tags:
+        - Schedules
+      parameters:
+        - name: name
+          in: path
+          description: Schedule name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Schedule details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleResponse'
+        '400':
+          description: Invalid schedule name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Schedule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Scheduler not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update a schedule
+      description: Updates an existing schedule with new configuration
+      operationId: updateSchedule
+      tags:
+        - Schedules
+      parameters:
+        - name: name
+          in: path
+          description: Schedule name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScheduleRequest'
+      responses:
+        '204':
+          description: Schedule updated successfully
+        '400':
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Schedule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Scheduler not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete a schedule
+      description: Removes a schedule and stops any pending triggers
+      operationId: deleteSchedule
+      tags:
+        - Schedules
+      parameters:
+        - name: name
+          in: path
+          description: Schedule name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Schedule deleted successfully
+        '400':
+          description: Invalid schedule name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Schedule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Scheduler not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/schedules/{name}/enable:
+    post:
+      summary: Enable a schedule
+      description: Enables a disabled schedule so it will trigger jobs again
+      operationId: enableSchedule
+      tags:
+        - Schedules
+      parameters:
+        - name: name
+          in: path
+          description: Schedule name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Schedule enabled successfully
+        '400':
+          description: Invalid schedule name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Schedule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Scheduler not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/schedules/{name}/disable:
+    post:
+      summary: Disable a schedule
+      description: Disables a schedule so it will no longer trigger jobs
+      operationId: disableSchedule
+      tags:
+        - Schedules
+      parameters:
+        - name: name
+          in: path
+          description: Schedule name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Schedule disabled successfully
+        '400':
+          description: Invalid schedule name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Schedule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Scheduler not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: API key for authentication. Required when server is started with --http-auth flag.
+
+  schemas:
+    ProfileResponse:
+      type: object
+      description: Current user's profile. Empty username indicates no authentication required.
+      required:
+        - username
+        - roles
+      properties:
+        username:
+          type: string
+          description: Authenticated user's name. Empty string if authentication is not required.
+          example: "admin"
+        roles:
+          type: array
+          description: List of roles assigned to the user
+          items:
+            type: string
+            enum:
+              - "jobs:read"
+              - "jobs:write"
+              - "flows:read"
+              - "flows:write"
+              - "schedules:read"
+              - "schedules:write"
+          example: ["jobs:read", "jobs:write", "flows:read"]
+
+    JobStatus:
+      type: string
+      description: The current status of a job
+      enum:
+        - pending
+        - running
+        - done
+        - failed
+
+    Job:
+      type: object
+      description: A job in the queue
+      required:
+        - id
+        - flow
+        - created_at
+      properties:
+        id:
+          type: string
+          description: Unique job identifier (16 character hex string)
+          example: "a1b2c3d4e5f67890"
+        flow:
+          type: string
+          description: Name of the flow to execute
+          example: "my-workflow"
+        inputs:
+          type: object
+          description: Input key-value pairs passed to the flow
+          additionalProperties:
+            type: string
+          example:
+            name: "test"
+            environment: "production"
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the job was created
+          example: "2024-01-15T10:30:00Z"
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the job started executing
+          example: "2024-01-15T10:30:05Z"
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the job finished (successfully or with error)
+          example: "2024-01-15T10:31:00Z"
+        error:
+          type: string
+          description: Error message if the job failed
+          example: "step 'build' failed: exit code 1"
+        exit_code:
+          type: integer
+          nullable: true
+          description: Exit code of the job (0 for success, non-zero for failure)
+          example: 0
+
+    JobWithStatus:
+      allOf:
+        - $ref: '#/components/schemas/Job'
+        - type: object
+          required:
+            - status
+          properties:
+            status:
+              $ref: '#/components/schemas/JobStatus'
+
+    JobEnqueueRequest:
+      type: object
+      description: Request to enqueue a new job
+      required:
+        - flow
+      properties:
+        flow:
+          type: string
+          description: Name of the flow to execute (must exist in flows directory)
+          example: "my-workflow"
+        inputs:
+          type: object
+          description: Input key-value pairs to pass to the flow (available as YAFE_INPUT_* environment variables)
+          additionalProperties:
+            type: string
+          example:
+            name: "test"
+            environment: "production"
+
+    JobEnqueueResponse:
+      type: object
+      description: Response after successfully enqueuing a job
+      required:
+        - job_id
+      properties:
+        job_id:
+          type: string
+          description: The ID of the newly created job
+          example: "a1b2c3d4e5f67890"
+
+    ErrorResponse:
+      type: object
+      description: Error response
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: "flow not found: unknown-flow"
+
+    FlowResponse:
+      type: object
+      description: Flow details
+      required:
+        - name
+        - content
+      properties:
+        name:
+          type: string
+          description: Flow name
+          example: "my-workflow"
+        content:
+          type: string
+          description: YAML content of the flow definition
+          example: |
+            runs-on: host
+            name: my-workflow
+            steps:
+              - name: hello
+                kind: shell
+                cmd: echo "Hello, World!"
+
+    AddFlowRequest:
+      type: object
+      description: Request to add or update a flow
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: YAML content of the flow definition
+          example: |
+            name: my-workflow
+            steps:
+              - name: hello
+                kind: shell
+                cmd: echo "Hello, World!"
+
+    RenameFlowRequest:
+      type: object
+      description: Request to rename a flow
+      required:
+        - new_name
+      properties:
+        new_name:
+          type: string
+          description: New flow name (must be unique and follow naming conventions)
+          pattern: '^[a-zA-Z0-9_-]+$'
+          example: "my-renamed-workflow"
+
+    ScheduleType:
+      type: string
+      description: The type of schedule trigger
+      enum:
+        - cron
+        - interval
+
+    CreateScheduleRequest:
+      type: object
+      description: Request to create a new schedule
+      required:
+        - name
+        - flow
+        - type
+        - expression
+      properties:
+        name:
+          type: string
+          description: Unique name for the schedule
+          example: "daily-backup"
+        flow:
+          type: string
+          description: Name of the flow to execute (must exist in flows directory)
+          example: "backup-flow"
+        type:
+          $ref: '#/components/schemas/ScheduleType'
+        expression:
+          type: string
+          description: Schedule expression (cron syntax for type "cron", duration like "5m" or "1h" for type "interval")
+          example: "0 0 * * *"
+        inputs:
+          type: object
+          description: Input key-value pairs to pass to the flow
+          additionalProperties:
+            type: string
+          example:
+            target: "database"
+            retention: "7d"
+        enabled:
+          type: boolean
+          description: Whether the schedule is enabled
+          default: false
+          example: true
+
+    UpdateScheduleRequest:
+      type: object
+      description: Request to update an existing schedule
+      required:
+        - flow
+        - type
+        - expression
+      properties:
+        flow:
+          type: string
+          description: Name of the flow to execute (must exist in flows directory)
+          example: "backup-flow"
+        type:
+          $ref: '#/components/schemas/ScheduleType'
+        expression:
+          type: string
+          description: Schedule expression (cron syntax for type "cron", duration like "5m" or "1h" for type "interval")
+          example: "0 0 * * *"
+        inputs:
+          type: object
+          description: Input key-value pairs to pass to the flow
+          additionalProperties:
+            type: string
+          example:
+            target: "database"
+            retention: "7d"
+        enabled:
+          type: boolean
+          description: Whether the schedule is enabled
+          example: true
+
+    ScheduleResponse:
+      type: object
+      description: Schedule details
+      required:
+        - name
+        - flow
+        - type
+        - expression
+        - enabled
+        - created_at
+      properties:
+        name:
+          type: string
+          description: Unique name for the schedule
+          example: "daily-backup"
+        flow:
+          type: string
+          description: Name of the flow to execute
+          example: "backup-flow"
+        type:
+          $ref: '#/components/schemas/ScheduleType'
+        expression:
+          type: string
+          description: Schedule expression
+          example: "0 0 * * *"
+        inputs:
+          type: object
+          description: Input key-value pairs passed to the flow
+          additionalProperties:
+            type: string
+          example:
+            target: "database"
+            retention: "7d"
+        enabled:
+          type: boolean
+          description: Whether the schedule is enabled
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the schedule was created
+          example: "2024-01-15T10:30:00Z"
+        last_run_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the last triggered job
+          example: "2024-01-16T00:00:00Z"
+        next_run_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Computed timestamp of the next scheduled trigger (null if disabled)
+          example: "2024-01-17T00:00:00Z"
+
+tags:
+  - name: Auth
+    description: Authentication and profile operations
+  - name: Jobs
+    description: Job queue management operations
+  - name: Flows
+    description: Flow definition management operations
+  - name: Schedules
+    description: Schedule management operations for automated job triggers

@@ -1,0 +1,41 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+jobs:
+  build:
+    runs-on: native
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Native - checkstyle, audit, build
+        shell: bash
+        run: |
+          make clean dependencies checkstyle audit build-all
+
+      - name: Native - test
+        shell: bash
+        run: |
+          make test-coverage
+
+      - name: OCI - prepare
+        uses: docker/setup-buildx-action@v3
+
+      - name: OCI - build
+        shell: bash
+        run: |
+          docker buildx build --no-cache -t git.myservermanager.com/varakh/yafe:${{ forgejo.sha }} -f Dockerfile .
+
+      - name: Native - security scan
+        shell: bash
+        run: |
+          make scan
+
+      - name: Native - archive scan results
+        uses: actions/upload-artifact@v3
+        with:
+          name: grype.txt
+          path: bin/grype.txt

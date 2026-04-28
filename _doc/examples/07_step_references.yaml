@@ -1,0 +1,32 @@
+# Step output references
+# Demonstrates: ${{ steps.<name>.outputs.<output> }} template syntax
+runs-on: host
+steps:
+  - name: build
+    cmd: |
+      echo "version=2.0.0" >> $YAFE_OUTPUT
+      echo "commit=abc1234" >> $YAFE_OUTPUT
+      mkdir -p $YAFE_STATE/build
+      echo "compiled binary" > $YAFE_STATE/build/app.bin
+    kind: shell
+    outputs:
+      - name: version
+        type: variable
+      - name: commit
+        type: variable
+      - name: binary
+        type: file
+        path: build/app.bin
+
+  - name: test
+    cmd: |
+      echo "Testing version ${{ steps.build.outputs.version }}"
+      echo "Commit: ${{ steps.build.outputs.commit }}"
+    kind: shell
+
+  - name: deploy
+    cmd: |
+      echo "Deploying ${{ steps.build.outputs.version }} (${{ steps.build.outputs.commit }})"
+      echo "Binary location: ${{ steps.build.outputs.binary }}"
+      cat ${{ steps.build.outputs.binary }}
+    kind: shell

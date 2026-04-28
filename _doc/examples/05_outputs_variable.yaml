@@ -1,0 +1,20 @@
+# Variable outputs
+# Demonstrates: outputs with type: variable, YAFE_OUTPUT environment variable
+runs-on: host
+steps:
+  - name: producer
+    cmd: |
+      echo "version=1.2.3" >> $YAFE_OUTPUT
+      echo "build_number=42" >> $YAFE_OUTPUT
+    kind: shell
+    outputs:
+      - name: version
+        type: variable
+      - name: build_number
+        type: variable
+
+  - name: consumer
+    cmd: |
+      echo "Version: ${{ steps.producer.outputs.version }}"
+      echo "Build: ${{ steps.producer.outputs.build_number }}"
+    kind: shell

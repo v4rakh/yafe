@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Build artifacts
+bin/
+coverage/
+*.out
+dist
+node_modules
+
+# Documentation
+_doc/
+*.md
+
+# Nix
+flake.nix
+flake.lock
+result
+
+# Docker
+Dockerfile
+.dockerignore

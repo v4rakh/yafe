@@ -1,0 +1,2 @@
+export const POLLING_INTERVAL_LIST = 10000;
+export const POLLING_INTERVAL_DETAIL = 3000;

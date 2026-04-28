@@ -1,0 +1,19 @@
+# File outputs
+# Demonstrates: outputs with type: file, YAFE_STATE environment variable
+runs-on: host
+steps:
+  - name: builder
+    cmd: |
+      mkdir -p $YAFE_STATE/builder
+      echo "artifact content here" > $YAFE_STATE/builder/artifact.txt
+    kind: shell
+    outputs:
+      - name: artifact
+        type: file
+        path: builder/artifact.txt
+
+  - name: deployer
+    cmd: |
+      echo "Deploying artifact:"
+      cat ${{ steps.builder.outputs.artifact }}
+    kind: shell

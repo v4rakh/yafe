@@ -1,0 +1,63 @@
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "version to use"
+        required: true
+        type: string
+env:
+  FORGE_FQDN: git.myservermanager.com
+  FORGE_URL: https://git.myservermanager.com
+  FORGE_REPOSITORY_NAME: varakh/yafe
+jobs:
+  release:
+    runs-on: native
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Native - build
+        shell: bash
+        run: |
+          make clean dependencies build-all
+
+      - name: OCI - Login
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.FORGE_FQDN }}
+          username: ${{ secrets.FORGE_USER }}
+          password: ${{ secrets.FORGE_TOKEN }}
+
+      - name: OCI - prepare
+        uses: docker/setup-buildx-action@v3
+
+      - name: OCI - build and push
+        shell: bash
+        run: |
+          docker buildx build --push --no-cache -t git.myservermanager.com/varakh/yafe:${{ inputs.version }} -t git.myservermanager.com/varakh/yafe:latest -f Dockerfile .
+
+      - name: Upload artifacts
+        uses: ./.forgejo/actions/forgejo-release
+        with:
+          url: ${{ env.FORGE_URL }}
+          repo: ${{ env.FORGE_REPOSITORY_NAME }}
+          token: ${{ secrets.FORGE_TOKEN }}
+          tag: ${{ inputs.version }}
+          direction: upload
+          release-dir: bin
+
+      - name: Delete latest tag if exists
+        shell: bash
+        run: |
+          git fetch --tags --force
+          if git rev-parse latest >/dev/null 2>&1; then
+            git tag -d latest
+            git push origin --delete latest
+          fi
+
+      - name: Create latest tag on released commit
+        shell: bash
+        run: |
+          TAG_COMMIT=$(git rev-list -n 1 ${{ inputs.version }})
+          git tag latest "$TAG_COMMIT"
+          git push origin latest

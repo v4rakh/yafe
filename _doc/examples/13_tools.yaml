@@ -1,0 +1,8 @@
+# Tools declaration
+# Demonstrates: tools field with PATH lookup
+runs-on: host
+tools:
+  - name: bash
+steps:
+  - cmd: echo "Tool 'bash' verified via PATH lookup"
+    kind: shell

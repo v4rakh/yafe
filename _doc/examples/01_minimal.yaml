@@ -1,0 +1,6 @@
+# Minimal valid flow
+# Demonstrates: runs-on, steps, kind, cmd
+runs-on: host
+steps:
+  - cmd: echo "Hello, World!"
+    kind: shell

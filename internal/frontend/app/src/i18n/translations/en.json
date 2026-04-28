@@ -1,0 +1,133 @@
+{
+  "actions": {
+    "clone": "Clone",
+    "create": "Create",
+    "delete": "Delete",
+    "edit": "Edit",
+    "list": "List",
+    "show": "Show"
+  },
+  "auth": {
+    "accessDenied": "Access Denied",
+    "accessDeniedMessage": "You do not have permission to access this resource.",
+    "apiKey": "API Key",
+    "apiKeyPlaceholder": "Enter your API key",
+    "apiKeyRequired": "Please enter your API key",
+    "goHome": "Go Home",
+    "invalidApiKey": "Invalid API key",
+    "login": "Login",
+    "logout": "Logout",
+    "missingPermission": "Missing permission: {{permission}}"
+  },
+  "buttons": {
+    "autoRefresh": "Auto Refresh",
+    "refresh": "Refresh"
+  },
+  "common": {
+    "actions": "Actions",
+    "cancel": "Cancel",
+    "content": "Content",
+    "created": "Created",
+    "enabled": "Enabled",
+    "error": "Error",
+    "inputs": "Inputs",
+    "name": "Name",
+    "noData": "-",
+    "totalItems": "{{total}} items",
+    "type": "Type"
+  },
+  "flows": {
+    "actions": {
+      "rename": "Rename Flow"
+    },
+    "contentYaml": "Content (YAML)",
+    "flowNoLongerExists": "Flow no longer exists or you don't have permission to view",
+    "flows": "Flows",
+    "messages": {
+      "renameConflict": "A flow with this name already exists",
+      "renameError": "Failed to rename flow",
+      "renameSuccess": "Flow renamed successfully"
+    },
+    "renameDialog": {
+      "confirm": "Rename",
+      "newNameLabel": "New Name",
+      "newNamePlaceholder": "Enter new flow name",
+      "title": "Rename Flow",
+      "warning": "All schedules using this flow will be automatically updated."
+    },
+    "run": "Run",
+    "runFlow": "Run Flow: {{name}}",
+    "validation": {
+      "contentRequired": "Please enter flow content",
+      "namePattern": "Name can only contain letters, numbers, hyphens, and underscores",
+      "nameRequired": "Please enter a flow name",
+      "newNameInvalid": "Name can only contain letters, numbers, hyphens, and underscores",
+      "newNameRequired": "New name is required",
+      "newNameSame": "New name must be different from current name"
+    }
+  },
+  "form": {
+    "addInput": "Add Input",
+    "inputsDescription": "Inputs (optional key-value pairs)",
+    "key": "Key",
+    "keyRequired": "Key required",
+    "selectFlow": "Select a flow",
+    "value": "Value",
+    "valueRequired": "Value required"
+  },
+  "jobs": {
+    "details": "Job Details",
+    "ended": "Ended",
+    "enqueued": "Job enqueued: {{id}}",
+    "exitCode": "Exit Code",
+    "failedToEnqueue": "Failed to enqueue job: {{error}}",
+    "failedToFetchLogs": "Failed to fetch logs: {{error}}",
+    "flow": "Flow",
+    "id": "ID",
+    "jobs": "Jobs",
+    "logs": "Logs",
+    "logsAvailableAfterCompletion": "Logs will be available after the job completes",
+    "logsNotFound": "Logs not found",
+    "logsNotYetAvailable": "Logs not yet available",
+    "noLogsAvailable": "No logs available",
+    "started": "Started",
+    "status": "Status",
+    "statuses": {
+      "done": "Done",
+      "failed": "Failed",
+      "pending": "Pending",
+      "running": "Running"
+    }
+  },
+  "notifications": {
+    "createError": "Error creating (status code: {{statusCode}})",
+    "createSuccess": "Created successfully",
+    "deleteError": "Error deleting (status code: {{statusCode}})",
+    "deleteSuccess": "Deleted successfully",
+    "editError": "Error updating (status code: {{statusCode}})",
+    "editSuccess": "Updated successfully",
+    "error": "Error",
+    "success": "",
+    "undoable": "You have {{seconds}} seconds to undo"
+  },
+  "schedules": {
+    "cron": "Cron",
+    "details": "Schedule Details",
+    "disabled": "Schedule \"{{name}}\" disabled",
+    "enabled": "Schedule \"{{name}}\" enabled",
+    "expression": "Expression",
+    "expressionHint": "For cron: '0 0 * * *' (daily at midnight). For interval: '5m', '1h', etc.",
+    "failedToToggle": "Failed to toggle schedule: {{error}}",
+    "interval": "Interval",
+    "lastRun": "Last Run",
+    "nextRun": "Next Run",
+    "schedules": "Schedules",
+    "validation": {
+      "expressionRequired": "Please enter an expression",
+      "flowRequired": "Please select a flow",
+      "namePattern": "Name can only contain letters, numbers, hyphens, and underscores",
+      "nameRequired": "Please enter a schedule name",
+      "typeRequired": "Please select a type"
+    }
+  }
+}

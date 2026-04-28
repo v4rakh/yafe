@@ -1,0 +1,14 @@
+# Shell interpreter options
+# Demonstrates: shell field with different interpreters
+runs-on: host
+steps:
+  - cmd: echo "Using default shell (bash)"
+    kind: shell
+
+  - cmd: echo "Using bash explicitly"
+    kind: shell
+    shell: bash
+
+  - cmd: echo "Using sh"
+    kind: shell
+    shell: sh

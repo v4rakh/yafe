@@ -1,0 +1,9 @@
+# Multi-line commands
+# Demonstrates: multi-line cmd using YAML literal block scalar
+runs-on: host
+steps:
+  - cmd: |
+      echo "Line 1: Setting up"
+      echo "Line 2: Processing"
+      echo "Line 3: Complete"
+    kind: shell

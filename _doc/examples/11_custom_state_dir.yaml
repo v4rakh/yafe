@@ -1,0 +1,10 @@
+# Custom state directory
+# Demonstrates: state-dir field
+state-dir: /tmp/yafe-custom-state-test
+runs-on: host
+steps:
+  - name: check-state
+    cmd: |
+      echo "State dir is: $YAFE_STATE"
+      echo "Expected: /tmp/yafe-custom-state-test"
+    kind: shell
