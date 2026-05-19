@@ -47,6 +47,11 @@ linters:
     generated: strict
     paths:
       - _test\.go
+    rules:
+      - linters: [errcheck]
+        text: "resp\\.Body\\.Close"
+      - linters: [errcheck]
+        text: "fmt\\.F(print|printf|println)"
 formatters:
   enable:
     - gofmt

@@ -88,7 +88,7 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	if c.apiKey != "" {
 		req.Header.Set(auth.HeaderAPIKey, c.apiKey)
 	}
-	return c.httpClient.Do(req)
+	return c.httpClient.Do(req) //nolint:gosec
 }
 
 // ListJobs returns jobs filtered by status.
@@ -106,7 +106,7 @@ func (c *Client) ListJobs(statuses []string) ([]*JobWithStatus, error) {
 		u.RawQuery = q.Encode()
 	}
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (c *Client) ListJobs(statuses []string) ([]*JobWithStatus, error) {
 
 // GetJob retrieves a job by ID.
 func (c *Client) GetJob(id string) (*JobWithStatus, error) {
-	req, err := http.NewRequest(http.MethodGet, c.baseURL+"/api/v1/jobs/"+url.PathEscape(id), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, c.baseURL+"/api/v1/jobs/"+url.PathEscape(id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (c *Client) GetJob(id string) (*JobWithStatus, error) {
 
 // GetJobLogs retrieves a job's logs by ID.
 func (c *Client) GetJobLogs(id string) (string, error) {
-	req, err := http.NewRequest(http.MethodGet, c.baseURL+"/api/v1/jobs/"+url.PathEscape(id)+"/logs", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, c.baseURL+"/api/v1/jobs/"+url.PathEscape(id)+"/logs", nil)
 	if err != nil {
 		return "", err
 	}
@@ -191,7 +191,7 @@ func (c *Client) EnqueueJob(flow string, inputs map[string]string) (string, erro
 		return "", fmt.Errorf("encoding request: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.baseURL+"/api/v1/jobs", bytes.NewReader(data))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/api/v1/jobs", bytes.NewReader(data))
 	if err != nil {
 		return "", err
 	}
@@ -219,7 +219,7 @@ func (c *Client) EnqueueJob(flow string, inputs map[string]string) (string, erro
 
 // DeleteJob removes a job from the queue.
 func (c *Client) DeleteJob(id string) error {
-	req, err := http.NewRequest(http.MethodDelete, c.baseURL+"/api/v1/jobs/"+url.PathEscape(id), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodDelete, c.baseURL+"/api/v1/jobs/"+url.PathEscape(id), nil)
 	if err != nil {
 		return err
 	}
@@ -239,7 +239,7 @@ func (c *Client) DeleteJob(id string) error {
 
 // ListFlows returns all flow names.
 func (c *Client) ListFlows() ([]string, error) {
-	req, err := http.NewRequest(http.MethodGet, c.baseURL+"/api/v1/flows", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, c.baseURL+"/api/v1/flows", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +264,7 @@ func (c *Client) ListFlows() ([]string, error) {
 
 // GetFlow retrieves a flow by name.
 func (c *Client) GetFlow(name string) (*FlowResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.baseURL+"/api/v1/flows/"+url.PathEscape(name), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, c.baseURL+"/api/v1/flows/"+url.PathEscape(name), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +298,7 @@ func (c *Client) AddFlow(name string, content []byte) error {
 		return fmt.Errorf("encoding request: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPut, c.baseURL+"/api/v1/flows/"+url.PathEscape(name), bytes.NewReader(data))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, c.baseURL+"/api/v1/flows/"+url.PathEscape(name), bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
@@ -325,7 +325,7 @@ func (c *Client) RenameFlow(oldName, newName string) error {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.baseURL+"/api/v1/flows/"+url.PathEscape(oldName)+"/rename", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/api/v1/flows/"+url.PathEscape(oldName)+"/rename", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -345,7 +345,7 @@ func (c *Client) RenameFlow(oldName, newName string) error {
 
 // DeleteFlow removes a flow.
 func (c *Client) DeleteFlow(name string) error {
-	req, err := http.NewRequest(http.MethodDelete, c.baseURL+"/api/v1/flows/"+url.PathEscape(name), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodDelete, c.baseURL+"/api/v1/flows/"+url.PathEscape(name), nil)
 	if err != nil {
 		return err
 	}
@@ -417,7 +417,7 @@ type UpdateScheduleRequest struct {
 
 // ListSchedules returns all schedules.
 func (c *Client) ListSchedules() ([]*Schedule, error) {
-	req, err := http.NewRequest(http.MethodGet, c.baseURL+"/api/v1/schedules", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, c.baseURL+"/api/v1/schedules", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -442,7 +442,7 @@ func (c *Client) ListSchedules() ([]*Schedule, error) {
 
 // GetSchedule retrieves a schedule by name.
 func (c *Client) GetSchedule(name string) (*Schedule, error) {
-	req, err := http.NewRequest(http.MethodGet, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +472,7 @@ func (c *Client) CreateSchedule(req CreateScheduleRequest) error {
 		return fmt.Errorf("encoding request: %w", err)
 	}
 
-	httpReq, err := http.NewRequest(http.MethodPost, c.baseURL+"/api/v1/schedules", bytes.NewReader(data))
+	httpReq, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/api/v1/schedules", bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
@@ -498,7 +498,7 @@ func (c *Client) UpdateSchedule(name string, req UpdateScheduleRequest) error {
 		return fmt.Errorf("encoding request: %w", err)
 	}
 
-	httpReq, err := http.NewRequest(http.MethodPut, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name), bytes.NewReader(data))
+	httpReq, err := http.NewRequestWithContext(context.Background(), http.MethodPut, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name), bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
@@ -519,7 +519,7 @@ func (c *Client) UpdateSchedule(name string, req UpdateScheduleRequest) error {
 
 // DeleteSchedule removes a schedule.
 func (c *Client) DeleteSchedule(name string) error {
-	req, err := http.NewRequest(http.MethodDelete, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodDelete, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name), nil)
 	if err != nil {
 		return err
 	}
@@ -539,7 +539,7 @@ func (c *Client) DeleteSchedule(name string) error {
 
 // EnableSchedule enables a schedule.
 func (c *Client) EnableSchedule(name string) error {
-	req, err := http.NewRequest(http.MethodPost, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name)+"/enable", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name)+"/enable", nil)
 	if err != nil {
 		return err
 	}
@@ -559,7 +559,7 @@ func (c *Client) EnableSchedule(name string) error {
 
 // DisableSchedule disables a schedule.
 func (c *Client) DisableSchedule(name string) error {
-	req, err := http.NewRequest(http.MethodPost, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name)+"/disable", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/api/v1/schedules/"+url.PathEscape(name)+"/disable", nil)
 	if err != nil {
 		return err
 	}

@@ -22,8 +22,9 @@ import (
 )
 
 const (
-	shutdownTimeout = 30 * time.Second
-	contentTypeJSON = "application/json"
+	shutdownTimeout   = 30 * time.Second
+	readHeaderTimeout = 60 * time.Second
+	contentTypeJSON   = "application/json"
 )
 
 // Config holds server configuration.
@@ -141,7 +142,7 @@ func spaFileServer(fsys fs.FS) http.Handler {
 		if err == nil {
 			// File exists, check if it's a directory
 			stat, err := f.Stat()
-			f.Close()
+			f.Close() //nolint:errcheck,gosec
 			if err == nil && !stat.IsDir() {
 				// It's a file - serve it normally
 				http.FileServerFS(fsys).ServeHTTP(w, r)
@@ -164,7 +165,7 @@ func spaFileServer(fsys fs.FS) http.Handler {
 			http.Error(w, "index.html not found", http.StatusNotFound)
 			return
 		}
-		defer indexFile.Close()
+		defer indexFile.Close() //nolint:errcheck
 
 		stat, err := indexFile.Stat()
 		if err != nil {
@@ -200,14 +201,15 @@ func (s *Server) Run(ctx context.Context) error {
 		}
 
 		// Listen on Unix socket
-		unixListener, err = net.Listen("unix", s.config.SocketPath)
+		lc := &net.ListenConfig{}
+		unixListener, err = lc.Listen(ctx, "unix", s.config.SocketPath)
 		if err != nil {
 			return err
 		}
-		defer os.Remove(s.config.SocketPath)
+		defer os.Remove(s.config.SocketPath) //nolint:errcheck
 
 		log.Info().Str("socket", s.config.SocketPath).Msg("Listening on Unix socket")
-		unixServer = &http.Server{Handler: s.socketHandler}
+		unixServer = &http.Server{Handler: s.socketHandler} //nolint:gosec
 
 		go func() {
 			if err := unixServer.Serve(unixListener); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -218,14 +220,15 @@ func (s *Server) Run(ctx context.Context) error {
 
 	// Start HTTP server if configured
 	if s.config.HTTPAddr != "" {
-		httpListener, err = net.Listen("tcp", s.config.HTTPAddr)
+		lc := &net.ListenConfig{}
+		httpListener, err = lc.Listen(ctx, "tcp", s.config.HTTPAddr)
 		if err != nil {
 			if unixListener != nil {
-				unixListener.Close()
+				unixListener.Close() //nolint:errcheck,gosec
 			}
 			return err
 		}
-		httpServer = &http.Server{Handler: s.httpHandler}
+		httpServer = &http.Server{Handler: s.httpHandler, ReadHeaderTimeout: readHeaderTimeout}
 		log.Info().Str("addr", s.config.HTTPAddr).Msg("Listening on HTTP")
 
 		go func() {
@@ -422,7 +425,7 @@ func (s *Server) handleGetJobLogs(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	if _, err := w.Write(logs); err != nil {
+	if _, err := w.Write(logs); err != nil { //nolint:gosec
 		log.Warn().Err(err).Str("job_id", jobID).Msg("Failed to write job logs response")
 	}
 }

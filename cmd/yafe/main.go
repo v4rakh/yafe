@@ -73,7 +73,7 @@ const (
 	// Environment variables (client)
 	envSocket = "YAFE_SOCKET"
 	envHTTP   = "YAFE_HTTP"
-	envAPIKey = "YAFE_API_KEY"
+	envAPIKey = "YAFE_API_KEY" //nolint:gosec
 
 	// Environment variables (serve)
 	envSocketEnabled = "YAFE_SOCKET_ENABLED"

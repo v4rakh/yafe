@@ -22,7 +22,7 @@ func NewFileAuthenticator(path string) (*FileAuthenticator, error) {
 	if err != nil {
 		return nil, fmt.Errorf("opening auth file: %w", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	var users []*User
 	scanner := bufio.NewScanner(file)

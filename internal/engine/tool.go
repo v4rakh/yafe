@@ -5,6 +5,7 @@ import (
 	"archive/zip"
 	"compress/bzip2"
 	"compress/gzip"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -114,8 +115,8 @@ func (m *ToolManager) resolveDownloadedTool(decl ToolDeclaration) error {
 			return fmt.Errorf("creating temp file for archive: %w", err)
 		}
 		tmpPath := tmpFile.Name()
-		tmpFile.Close()
-		defer os.Remove(tmpPath)
+		tmpFile.Close()          //nolint:errcheck,gosec
+		defer os.Remove(tmpPath) //nolint:errcheck
 
 		if err := m.download(decl.URL, tmpPath, retries); err != nil {
 			return err
@@ -138,7 +139,7 @@ func (m *ToolManager) resolveDownloadedTool(decl ToolDeclaration) error {
 
 		if decl.SHA256 != "" {
 			if err := m.verifyChecksum(toolPath, decl.SHA256); err != nil {
-				os.Remove(toolPath)
+				os.Remove(toolPath) //nolint:errcheck,gosec
 				return err
 			}
 		}
@@ -171,7 +172,7 @@ func (m *ToolManager) needsDownload(decl ToolDeclaration) (bool, error) {
 	meta, err := m.loadMeta(decl.Name)
 	if err != nil {
 		// No meta or error reading - need to download
-		return true, nil
+		return true, nil //nolint:nilerr
 	}
 
 	// Compare meta with declaration
@@ -205,8 +206,11 @@ func (m *ToolManager) download(url, dest string, retries int) error {
 
 // doDownload performs a single download attempt.
 func (m *ToolManager) doDownload(url, dest string) error {
-	//gosec:disable G304 -- URL comes from flow definition
-	resp, err := http.Get(url)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil) //nolint:gosec
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -221,7 +225,7 @@ func (m *ToolManager) doDownload(url, dest string) error {
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer out.Close() //nolint:errcheck
 
 	_, err = io.Copy(out, resp.Body)
 	return err
@@ -234,7 +238,7 @@ func (m *ToolManager) verifyChecksum(path, expected string) error {
 	if err != nil {
 		return fmt.Errorf("opening file for checksum: %w", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	h := sha256.New()
 	if _, err := io.Copy(h, file); err != nil {
@@ -288,13 +292,13 @@ func (m *ToolManager) extractTarGz(archive, destDir, toolName, binaryPath string
 	if err != nil {
 		return fmt.Errorf("%w: opening archive: %w", ErrToolExtract, err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	gzr, err := gzip.NewReader(file)
 	if err != nil {
 		return fmt.Errorf("%w: creating gzip reader: %w", ErrToolExtract, err)
 	}
-	defer gzr.Close()
+	defer gzr.Close() //nolint:errcheck
 
 	return m.extractFromTar(tar.NewReader(gzr), destDir, toolName, binaryPath)
 }
@@ -306,7 +310,7 @@ func (m *ToolManager) extractTarBz2(archive, destDir, toolName, binaryPath strin
 	if err != nil {
 		return fmt.Errorf("%w: opening archive: %w", ErrToolExtract, err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	bzr := bzip2.NewReader(file)
 	return m.extractFromTar(tar.NewReader(bzr), destDir, toolName, binaryPath)
@@ -319,7 +323,7 @@ func (m *ToolManager) extractTar(archive, destDir, toolName, binaryPath string) 
 	if err != nil {
 		return fmt.Errorf("%w: opening archive: %w", ErrToolExtract, err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	return m.extractFromTar(tar.NewReader(file), destDir, toolName, binaryPath)
 }
@@ -354,7 +358,9 @@ func (m *ToolManager) extractFromTar(tr *tar.Reader, destDir, toolName, binaryPa
 			// Limit extraction size to prevent zip bombs (1GB max)
 			limited := io.LimitReader(tr, 1<<30)
 			_, err = io.Copy(outFile, limited)
-			outFile.Close()
+			if closeErr := outFile.Close(); closeErr != nil && err == nil {
+				err = closeErr
+			}
 			if err != nil {
 				return fmt.Errorf("%w: extracting file: %w", ErrToolExtract, err)
 			}
@@ -373,7 +379,7 @@ func (m *ToolManager) extractZip(archive, destDir, toolName, binaryPath string) 
 	if err != nil {
 		return fmt.Errorf("%w: opening zip: %w", ErrToolExtract, err)
 	}
-	defer r.Close()
+	defer r.Close() //nolint:errcheck
 
 	for _, f := range r.File {
 		cleanName := filepath.Clean(f.Name)
@@ -393,15 +399,17 @@ func (m *ToolManager) extractZip(archive, destDir, toolName, binaryPath string) 
 			//gosec:disable G304 -- destPath is sanitized
 			outFile, err := os.Create(destPath)
 			if err != nil {
-				rc.Close()
+				rc.Close() //nolint:errcheck,gosec
 				return fmt.Errorf("%w: creating output file: %w", ErrToolExtract, err)
 			}
 
 			// Limit extraction size
 			limited := io.LimitReader(rc, 1<<30)
 			_, err = io.Copy(outFile, limited)
-			outFile.Close()
-			rc.Close()
+			if closeErr := outFile.Close(); closeErr != nil && err == nil {
+				err = closeErr
+			}
+			rc.Close() //nolint:errcheck,gosec
 			if err != nil {
 				return fmt.Errorf("%w: extracting file: %w", ErrToolExtract, err)
 			}

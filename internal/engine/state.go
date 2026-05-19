@@ -187,7 +187,7 @@ func (s *StateManager) parseOutputFile(stepName string) (map[string]string, erro
 		}
 		return nil, fmt.Errorf("opening output file %s: %w", outputFile, err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {

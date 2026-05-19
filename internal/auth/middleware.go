@@ -9,7 +9,7 @@ import (
 
 const (
 	// HeaderAPIKey is the header used for API key authentication.
-	HeaderAPIKey = "X-Api-Key"
+	HeaderAPIKey = "X-Api-Key" //nolint:gosec
 )
 
 type errorResponse struct {

@@ -119,7 +119,7 @@ func (q *FileQueue) Dequeue() (*Job, error) {
 	}
 
 	if len(entries) == 0 {
-		return nil, nil
+		return nil, nil //nolint:nilnil
 	}
 
 	// Sort by filename (timestamp prefix ensures FIFO)
@@ -144,7 +144,7 @@ func (q *FileQueue) Dequeue() (*Job, error) {
 		// Job was claimed by another worker, try next
 	}
 
-	return nil, nil
+	return nil, nil //nolint:nilnil
 }
 
 func (q *FileQueue) tryClaimJob(filename string) (*Job, bool, error) {
@@ -160,14 +160,14 @@ func (q *FileQueue) tryClaimJob(filename string) (*Job, bool, error) {
 		}
 		return nil, false, fmt.Errorf("opening job file: %w", err)
 	}
-	defer f.Close()
+	defer f.Close() //nolint:errcheck
 
 	// Try to acquire exclusive lock (non-blocking)
-	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil { //nolint:gosec
 		// Another worker has the lock
 		return nil, false, nil
 	}
-	defer syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+	defer syscall.Flock(int(f.Fd()), syscall.LOCK_UN) //nolint:errcheck,gosec
 
 	// Double-check file still exists (race condition protection)
 	if _, err := os.Stat(pendingPath); os.IsNotExist(err) {

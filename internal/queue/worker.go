@@ -151,7 +151,7 @@ func (w *Worker) processNext(ctx context.Context) (bool, error) {
 		log.Error().Err(err).Str("job_id", job.ID).Msg("Failed to create log file")
 		return true, w.queue.MarkFailed(job, 1, fmt.Sprintf("creating log file: %v", err))
 	}
-	defer logFile.Close()
+	defer logFile.Close() //nolint:errcheck
 
 	if err := w.engine.Run(ctx, flow, engine.WithLogWriter(logFile), engine.WithInputs(job.Inputs)); err != nil {
 		log.Error().Err(err).Str("job_id", job.ID).Msg("Flow execution failed")

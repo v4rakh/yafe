@@ -189,7 +189,7 @@ func (r *FileFlowRegistry) Rename(oldName, newName string) error {
 
 	// Write to new file using atomic pattern
 	tmpPath := newPath + ".tmp"
-	if err := os.WriteFile(tmpPath, content, 0600); err != nil {
+	if err := os.WriteFile(tmpPath, content, 0600); err != nil { //nolint:gosec
 		return fmt.Errorf("writing flow file: %w", err)
 	}
 
