@@ -3,6 +3,7 @@ package output
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -127,7 +128,7 @@ func FormatInt(i *int) string {
 	if i == nil {
 		return emptyValue
 	}
-	return fmt.Sprintf("%d", *i)
+	return strconv.Itoa(*i)
 }
 
 // TruncateString truncates a string to maxLen, adding "..." if truncated.

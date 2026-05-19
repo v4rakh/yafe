@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
@@ -81,7 +82,7 @@ func convertRawFlow(raw *rawFlow) (*Flow, error) {
 
 	// Parse runs-on
 	if raw.RunsOn == "" {
-		return nil, fmt.Errorf("runs-on: must be provided")
+		return nil, errors.New("runs-on: must be provided")
 	}
 	switch raw.RunsOn {
 	case RunsOnKindHost.String():
@@ -92,7 +93,7 @@ func convertRawFlow(raw *rawFlow) (*Flow, error) {
 
 	// Parse steps
 	if len(raw.Steps) == 0 {
-		return nil, fmt.Errorf("steps: must be provided")
+		return nil, errors.New("steps: must be provided")
 	}
 
 	flow.Steps = make([]Step, len(raw.Steps))
