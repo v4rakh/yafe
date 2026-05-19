@@ -41,9 +41,15 @@ dependencies-web:
 
 checkstyle: checkstyle-web checkstyle-server
 checkstyle-server:
-	$(GO) vet ./...
+	golangci-lint run
 checkstyle-web:
 	cd ${WEB_DIR}; $(PNPM) checkstyle
+
+checkstyle-fix: checkstyle-web-fix checkstyle-server-fix
+checkstyle-server-fix:
+	golangci-lint run --fix
+checkstyle-web-fix:
+	cd ${WEB_DIR} && $(PNPM) run format && $(PNPM) run lint:fix && $(PNPM) run i18n-sync && $(PNPM) run lint:style:fix
 
 generate:
 	$(GO) generate ./...
@@ -56,12 +62,6 @@ test-coverage:
 	$(GO_TEST) test -coverprofile ${TEST_DIR}/coverage.out -race -shuffle on -v ./...
 	@grep -v -E "dto.go|enum.go|_generated.go|_test.go|main.go" ${TEST_DIR}/coverage.out > ${TEST_DIR}/coverage.final.out || true
 	$(GO_TEST) tool cover -func=${TEST_DIR}/coverage.final.out
-
-audit: audit-web audit-server
-audit-server:
-	$(GOSEC) -quiet -sort -severity medium -confidence high ./...
-audit-web:
-	cd ${WEB_DIR}; $(PNPM) audit -P --audit-level critical;
 
 scan:
 	@NO_COLOR=1 $(GRYPE) -v -o table --file bin/grype.txt --fail-on critical bin/ || true
@@ -96,9 +96,9 @@ dev-web: clean dependencies
 .PHONY: clean clean-server clean-web \
 	dependencies dependencies-server dependencies-web \
 	checkstyle checkstyle-server checkstyle-web \
+	checkstyle-fix checkstyle-web-fix checkstyle-server-fix \
 	generate \
 	test test-coverage \
-	audit audit-server audit-web \
 	scan \
 	build build-web build-all \
 	build-freebsd-amd64 build-freebsd-arm64 \

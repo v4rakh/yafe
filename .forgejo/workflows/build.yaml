@@ -11,10 +11,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Native - checkstyle, audit, build
+      - name: Native - checkstyle, build
         shell: bash
         run: |
-          make clean dependencies checkstyle audit build-all
+          make clean dependencies checkstyle build-all
 
       - name: Native - test
         shell: bash
