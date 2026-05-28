@@ -12,7 +12,6 @@
       systems = [
         "x86_64-linux"
         "aarch64-linux"
-        "aarch64-darwin"
       ];
 
       perSystem =
@@ -64,7 +63,7 @@
             src = ./.;
             tags = [ "embed" ];
             doCheck = false;
-            vendorHash = "sha256-slzOPQPBlHRRE/3rNxQ40/WycMD98O57BL1k6WLaQTQ=";
+            vendorHash = "sha256-SkU+jj7mJY+nameBt9aSDqvunYE6ZLwh8uKUG1o+jJo=";
 
             preBuild = ''
               mkdir -p internal/frontend/app

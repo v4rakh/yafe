@@ -456,6 +456,10 @@ Major updates undergo manual review.
      * `package.json`: `version`
    * Make sure `make clean dependencies checkstyle audit build-all test-coverage` is fine
    * Make sure `nix build` is fine (you need `nix` for it, update checksums in `flake.nix` if it fails)
+      ```shell
+      nix build .#packages.x86_64-linux.default -L
+      nix build .#packages.aarch64-linux.default -L
+      ```
    * Use `release/` as branch prefix and `release: prepare XYZ` as commit message
 2. Merge to trunk 
 3. Trigger the release job the semantic version which is inside the main trunk
