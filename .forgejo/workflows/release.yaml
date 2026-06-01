@@ -19,7 +19,7 @@ jobs:
       - name: Native - build
         shell: bash
         run: |
-          make clean dependencies build-all
+          nix develop --command bash -c "make clean dependencies build-all"
 
       - name: OCI - Login
         uses: docker/login-action@v3

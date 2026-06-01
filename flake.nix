@@ -38,7 +38,7 @@
                 src
                 pnpmInstallFlags
                 ;
-              fetcherVersion = 2;
+              fetcherVersion = 3;
               hash = "sha256-IkG5eHMilKFArpNCj8LfahN3RoK6u7cFeRovPgkr4Rk=";
             };
 
@@ -63,7 +63,7 @@
             src = ./.;
             tags = [ "embed" ];
             doCheck = false;
-            vendorHash = "sha256-SkU+jj7mJY+nameBt9aSDqvunYE6ZLwh8uKUG1o+jJo=";
+            vendorHash = "sha256-zCCH0h9n+Z7fWOJ7d8zFv4OmmNna3pzPPZ41DPOJ9dI=";
 
             preBuild = ''
               mkdir -p internal/frontend/app
@@ -73,6 +73,17 @@
           };
 
           packages.default = self'.packages.server;
+
+          devShells.default = pkgs.mkShell {
+            packages = with pkgs; [
+              git-cliff
+              gnumake
+              go
+              grype
+              nodejs_24
+              pnpm
+            ];
+          };
         };
     };
 }
