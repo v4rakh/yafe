@@ -456,7 +456,7 @@ var serveCmd = &cli.Command{
 var jobsEnqueueCmd = &cli.Command{
 	Name:      "enqueue",
 	Usage:     "enqueue a job for a flow",
-	ArgsUsage: "<flow-name>",
+	ArgsUsage: "<flow-name>", //nolint:goconst
 	Flags: []cli.Flag{
 		&cli.StringSliceFlag{
 			Name:    flagInput,
@@ -498,7 +498,7 @@ var jobsEnqueueCmd = &cli.Command{
 }
 
 var jobsListCmd = &cli.Command{
-	Name:  "list",
+	Name:  "list", //nolint:goconst
 	Usage: "list jobs in the queue",
 	Flags: []cli.Flag{
 		&cli.StringSliceFlag{
@@ -508,7 +508,7 @@ var jobsListCmd = &cli.Command{
 		},
 		&cli.BoolFlag{
 			Name:  flagRaw,
-			Usage: "output raw JSON",
+			Usage: "output raw JSON", //nolint:goconst
 		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -556,9 +556,9 @@ var jobsListCmd = &cli.Command{
 }
 
 var jobsGetCmd = &cli.Command{
-	Name:      "get",
+	Name:      "get", //nolint:goconst
 	Usage:     "get a job by ID",
-	ArgsUsage: "<job-id>",
+	ArgsUsage: "<job-id>", //nolint:goconst
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  flagRaw,
@@ -885,7 +885,7 @@ var schedulesListCmd = &cli.Command{
 var schedulesGetCmd = &cli.Command{
 	Name:      "get",
 	Usage:     "get a schedule by name",
-	ArgsUsage: "<schedule-name>",
+	ArgsUsage: "<schedule-name>", //nolint:goconst
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  flagRaw,
