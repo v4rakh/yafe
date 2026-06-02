@@ -70,24 +70,24 @@ scan:
 	@cat ./bin/grype.txt
 
 build: clean dependencies build-web
-	$(GO) build -tags embed -o ${BIN_DIR}/yafe-${GOOS}-${GOARCH} ${CMD_GO_FILES}
+	$(GO) build -tags embed -trimpath -ldflags="-s -w" -o ${BIN_DIR}/yafe-${GOOS}-${GOARCH} ${CMD_GO_FILES}
 build-web: dependencies-web
 	cd ${WEB_DIR}; $(PNPM) build
 
 build-all: build-freebsd-amd64 build-freebsd-arm64 build-darwin-amd64 build-darwin-arm64 build-linux-amd64 build-linux-arm64
 
 build-freebsd-amd64: build-web
-	GOOS=freebsd GOARCH=amd64 $(GO) build -tags embed -o ${BIN_DIR}/yafe-freebsd-amd64 ${CMD_GO_FILES}
+	GOOS=freebsd GOARCH=amd64 $(GO) build -tags embed -trimpath -ldflags="-s -w" -o ${BIN_DIR}/yafe-freebsd-amd64 ${CMD_GO_FILES}
 build-freebsd-arm64: build-web
-	GOOS=freebsd GOARCH=arm64 $(GO) build -tags embed -o ${BIN_DIR}/yafe-freebsd-arm64 ${CMD_GO_FILES}
+	GOOS=freebsd GOARCH=arm64 $(GO) build -tags embed -trimpath -ldflags="-s -w" -o ${BIN_DIR}/yafe-freebsd-arm64 ${CMD_GO_FILES}
 build-darwin-amd64: build-web
-	GOOS=darwin GOARCH=amd64 $(GO) build -tags embed -o ${BIN_DIR}/yafe-darwin-amd64 ${CMD_GO_FILES}
+	GOOS=darwin GOARCH=amd64 $(GO) build -tags embed -trimpath -ldflags="-s -w" -o ${BIN_DIR}/yafe-darwin-amd64 ${CMD_GO_FILES}
 build-darwin-arm64: build-web
-	GOOS=darwin GOARCH=arm64 $(GO) build -tags embed -o ${BIN_DIR}/yafe-darwin-arm64 ${CMD_GO_FILES}
+	GOOS=darwin GOARCH=arm64 $(GO) build -tags embed -trimpath -ldflags="-s -w" -o ${BIN_DIR}/yafe-darwin-arm64 ${CMD_GO_FILES}
 build-linux-amd64: build-web
-	GOOS=linux GOARCH=amd64 $(GO) build -tags embed -o ${BIN_DIR}/yafe-linux-amd64 ${CMD_GO_FILES}
+	GOOS=linux GOARCH=amd64 $(GO) build -tags embed -trimpath -ldflags="-s -w" -o ${BIN_DIR}/yafe-linux-amd64 ${CMD_GO_FILES}
 build-linux-arm64: build-web
-	GOOS=linux GOARCH=arm64 $(GO) build -tags embed -o ${BIN_DIR}/yafe-linux-arm64 ${CMD_GO_FILES}
+	GOOS=linux GOARCH=arm64 $(GO) build -tags embed -trimpath -ldflags="-s -w" -o ${BIN_DIR}/yafe-linux-arm64 ${CMD_GO_FILES}
 
 dev-server: clean dependencies
 	$(GO) run ${CMD_GO_FILES} serve

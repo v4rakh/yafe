@@ -24,7 +24,7 @@ RUN go mod download
 # Copy source and frontend build
 COPY . .
 COPY --from=builder-frontend /src/web/dist ./internal/frontend/app/dist
-RUN CGO_ENABLED=0 GOOS=linux go build -tags embed -ldflags="-s -w" -o /yafe ./cmd/yafe
+RUN CGO_ENABLED=0 GOOS=linux go build -tags embed -trimpath -ldflags="-s -w" -o /yafe ./cmd/yafe
 
 FROM debian:trixie-slim
 

@@ -25,7 +25,7 @@
 
             nativeBuildInputs = with pkgs; [
               nodejs_24
-              pnpm_10
+              pnpm
               pnpmConfigHook
             ];
 
@@ -39,7 +39,7 @@
                 pnpmInstallFlags
                 ;
               fetcherVersion = 3;
-              hash = "sha256-IkG5eHMilKFArpNCj8LfahN3RoK6u7cFeRovPgkr4Rk=";
+              hash = "sha256-+2nzW3TlJ6LcHUi951n/FVRuj57GySt6m753ZmArOUw=";
             };
 
             buildPhase = ''
@@ -63,6 +63,10 @@
             src = ./.;
             tags = [ "embed" ];
             doCheck = false;
+            ldflags = [
+              "-s"
+              "-w"
+            ];
             vendorHash = "sha256-zCCH0h9n+Z7fWOJ7d8zFv4OmmNna3pzPPZ41DPOJ9dI=";
 
             preBuild = ''
