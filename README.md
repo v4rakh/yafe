@@ -16,6 +16,25 @@ You can either **download the binary** for your operating system, use the provid
 }
 ```
 
+There's a NixOS module which you can use. For available properties, see `nix/module.nix`. Here's a minimal example:
+
+```nix
+services.yafe = {
+  enable = true;
+  extraPackages = [
+    bash
+    curl
+    jq
+  ];
+  environment = {
+    # ...
+  };
+  environmentFiles = [
+    # ..., e.g., config.sops.yafe-env.path
+  ];
+};
+```
+
 ## Usage
 
 ### Direct Execution
