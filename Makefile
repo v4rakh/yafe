@@ -51,7 +51,7 @@ checkstyle-server-fix:
 	golangci-lint cache clean
 	golangci-lint run --fix
 checkstyle-web-fix:
-	cd ${WEB_DIR} && $(PNPM) run format && $(PNPM) run lint:fix && $(PNPM) run i18n-sync && $(PNPM) run lint:style:fix
+	cd ${WEB_DIR} && $(PNPM) run format && $(PNPM) run lint:fix && $(PNPM) run i18n-sync
 
 generate:
 	$(GO) generate ./...

@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strings"
 	"syscall"
+	"time"
 
 	"git.myservermanager.com/varakh/yafe/internal/auth"
 	"git.myservermanager.com/varakh/yafe/internal/client"
@@ -61,6 +62,14 @@ const (
 	flagSocketAuth = "auth-socket"
 	flagHTTPAuth   = "auth-http"
 
+	// Security header flags (serve command)
+	flagShCspEnabled           = "sh-csp-enabled"
+	flagShCspValue             = "sh-csp-value"
+	flagShHstsEnabled          = "sh-hsts-enabled"
+	flagShHstsMaxAge           = "sh-hsts-max-age"
+	flagShHstsIncludeSubDomain = "sh-hsts-include-sub-domains"
+	flagShHstsPreload          = "sh-hsts-preload"
+
 	// Auth hash command flags
 	flagKey = "key"
 
@@ -92,6 +101,14 @@ const (
 	envAuthFile      = "YAFE_AUTH_FILE"
 	envSocketAuth    = "YAFE_AUTH_SOCKET"
 	envHTTPAuth      = "YAFE_AUTH_HTTP"
+
+	// Environment variables (security headers)
+	envShCspEnabled           = "YAFE_SH_CSP_ENABLED"
+	envShCspValue             = "YAFE_SH_CSP_VALUE"
+	envShHstsEnabled          = "YAFE_SH_HSTS_ENABLED"
+	envShHstsMaxAge           = "YAFE_SH_HSTS_MAX_AGE"
+	envShHstsIncludeSubDomain = "YAFE_SH_HSTS_INCLUDE_SUB_DOMAINS"
+	envShHstsPreload          = "YAFE_SH_HSTS_PRELOAD"
 
 	// Environment variables (system)
 	envXDGRuntime   = "XDG_RUNTIME_DIR"
@@ -303,6 +320,38 @@ var serveCmd = &cli.Command{
 			Usage:   "require authentication for HTTP",
 			Sources: cli.EnvVars(envHTTPAuth),
 		},
+		// Security header flags
+		&cli.BoolFlag{
+			Name:    flagShCspEnabled,
+			Usage:   "emit Content-Security-Policy header for web interface responses",
+			Sources: cli.EnvVars(envShCspEnabled),
+		},
+		&cli.StringFlag{
+			Name:    flagShCspValue,
+			Usage:   "Content-Security-Policy directive string (uses a strict single-origin SPA default when not set)",
+			Sources: cli.EnvVars(envShCspValue),
+		},
+		&cli.BoolFlag{
+			Name:    flagShHstsEnabled,
+			Usage:   "emit Strict-Transport-Security header for web interface responses (enable only when end-user connection is HTTPS)",
+			Sources: cli.EnvVars(envShHstsEnabled),
+		},
+		&cli.DurationFlag{
+			Name:    flagShHstsMaxAge,
+			Value:   8760 * time.Hour,
+			Usage:   "HSTS max-age duration (how long browsers cache the HSTS policy)",
+			Sources: cli.EnvVars(envShHstsMaxAge),
+		},
+		&cli.BoolFlag{
+			Name:    flagShHstsIncludeSubDomain,
+			Usage:   "append includeSubDomains to the HSTS header value",
+			Sources: cli.EnvVars(envShHstsIncludeSubDomain),
+		},
+		&cli.BoolFlag{
+			Name:    flagShHstsPreload,
+			Usage:   "append preload to the HSTS header value (requires --sh-hsts-include-sub-domains)",
+			Sources: cli.EnvVars(envShHstsPreload),
+		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		socketEnabled := cmd.Bool(flagSocket)
@@ -422,6 +471,14 @@ var serveCmd = &cli.Command{
 			SocketAuth: socketAuth,
 			HTTPAuth:   httpAuth,
 			Auth:       authenticator,
+			SecurityHeaders: server.SecurityHeadersConfig{
+				CspEnabled:            cmd.Bool(flagShCspEnabled),
+				CspValue:              cmd.String(flagShCspValue),
+				HstsEnabled:           cmd.Bool(flagShHstsEnabled),
+				HstsMaxAge:            cmd.Duration(flagShHstsMaxAge),
+				HstsIncludeSubDomains: cmd.Bool(flagShHstsIncludeSubDomain),
+				HstsPreload:           cmd.Bool(flagShHstsPreload),
+			},
 		}
 		frontendFS, _ := fs.Sub(frontend.FrontendFS, "app/dist")
 		s := server.New(q, reg, sched, serverConfig, frontendFS)

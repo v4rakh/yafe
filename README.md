@@ -64,24 +64,30 @@ The daemon listens on Unix socket (`$XDG_RUNTIME_DIR/yafe/yafe.sock`) and HTTP (
 
 All of these can also be specified with direct command-line arguments, e.g., `yafe serve --queue-dir=...`.
 
-| Variable              | Description                                | Default           |
-|-----------------------|--------------------------------------------|-------------------|
-| `YAFE_SOCKET_ENABLED` | Enable Unix socket listener                | `false`           |
-| `YAFE_SOCKET_FILE`    | Unix socket path                           | -                 |
-| `YAFE_HTTP_ENABLED`   | Enable HTTP listener                       | `true`            |
-| `YAFE_HTTP_LISTEN`    | HTTP listen address                        | `:8080`           |
-| `YAFE_QUEUE_DIR`      | Queue directory                            | `/data/queue`     |
-| `YAFE_FLOWS_DIR`      | Flows directory                            | `/data/flows`     |
-| `YAFE_CLEANUP_DONE`   | Retention for completed jobs (e.g., `24h`) | `0` (disabled)    |
-| `YAFE_CLEANUP_FAILED` | Retention for failed jobs (e.g., `168h`)   | `0` (disabled)    |
-| `YAFE_POLL_INTERVAL`  | Queue poll interval                        | `1s`              |
-| `YAFE_SCHEDULES_DIR`  | Schedules directory                        | `/data/schedules` |
-| `YAFE_AUTH_USER`      | Single user name                           | -                 |
-| `YAFE_AUTH_KEY`       | Single user bcrypt-hashed key              | -                 |
-| `YAFE_AUTH_ROLE`      | Single user roles (comma-separated)        | -                 |
-| `YAFE_AUTH_FILE`      | Path to auth file                          | -                 |
-| `YAFE_AUTH_SOCKET`    | Require auth for Unix socket               | `false`           |
-| `YAFE_AUTH_HTTP`      | Require auth for HTTP                      | `false`           |
+| Variable                           | Description                                                                             | Default           |
+|------------------------------------|-----------------------------------------------------------------------------------------|-------------------|
+| `YAFE_SOCKET_ENABLED`              | Enable Unix socket listener                                                             | `false`           |
+| `YAFE_SOCKET_FILE`                 | Unix socket path                                                                        | -                 |
+| `YAFE_HTTP_ENABLED`                | Enable HTTP listener                                                                    | `true`            |
+| `YAFE_HTTP_LISTEN`                 | HTTP listen address                                                                     | `:8080`           |
+| `YAFE_QUEUE_DIR`                   | Queue directory                                                                         | `/data/queue`     |
+| `YAFE_FLOWS_DIR`                   | Flows directory                                                                         | `/data/flows`     |
+| `YAFE_CLEANUP_DONE`                | Retention for completed jobs (e.g., `24h`)                                              | `0` (disabled)    |
+| `YAFE_CLEANUP_FAILED`              | Retention for failed jobs (e.g., `168h`)                                                | `0` (disabled)    |
+| `YAFE_POLL_INTERVAL`               | Queue poll interval                                                                     | `1s`              |
+| `YAFE_SCHEDULES_DIR`               | Schedules directory                                                                     | `/data/schedules` |
+| `YAFE_AUTH_USER`                   | Single user name                                                                        | -                 |
+| `YAFE_AUTH_KEY`                    | Single user bcrypt-hashed key                                                           | -                 |
+| `YAFE_AUTH_ROLE`                   | Single user roles (comma-separated)                                                     | -                 |
+| `YAFE_AUTH_FILE`                   | Path to auth file                                                                       | -                 |
+| `YAFE_AUTH_SOCKET`                 | Require auth for Unix socket                                                            | `false`           |
+| `YAFE_AUTH_HTTP`                   | Require auth for HTTP                                                                   | `false`           |
+| `YAFE_SH_CSP_ENABLED`              | Emit `Content-Security-Policy` header for web interface responses                       | `false`           |
+| `YAFE_SH_CSP_VALUE`                | CSP directive string (defaults to a strict single-origin SPA policy when not set)       | -                 |
+| `YAFE_SH_HSTS_ENABLED`             | Emit `Strict-Transport-Security` header (enable only when end-user connection is HTTPS) | `false`           |
+| `YAFE_SH_HSTS_MAX_AGE`             | HSTS `max-age` duration                                                                 | `8760h`           |
+| `YAFE_SH_HSTS_INCLUDE_SUB_DOMAINS` | Append `; includeSubDomains` to the HSTS header value                                   | `false`           |
+| `YAFE_SH_HSTS_PRELOAD`             | Append `; preload` to the HSTS header value (requires `INCLUDE_SUB_DOMAINS`)            | `false`           |
 
 Clients run against a started daemon. These can be specified with respective command-line options or with environment
 variables for client calls

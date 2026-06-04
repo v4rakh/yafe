@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net"
@@ -25,7 +26,21 @@ const (
 	shutdownTimeout   = 30 * time.Second
 	readHeaderTimeout = 60 * time.Second
 	contentTypeJSON   = "application/json"
+
+	// defaultCspValue is the CSP directive string applied when CspEnabled is true
+	// and CspValue is not overridden. Suitable for a single-origin Vite/React SPA.
+	defaultCspValue = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-ancestors 'none'; frame-src 'self'"
 )
+
+// SecurityHeadersConfig holds configuration for security response headers on the web interface.
+type SecurityHeadersConfig struct {
+	CspEnabled            bool
+	CspValue              string
+	HstsEnabled           bool
+	HstsMaxAge            time.Duration
+	HstsIncludeSubDomains bool
+	HstsPreload           bool
+}
 
 // Config holds server configuration.
 type Config struct {
@@ -36,6 +51,9 @@ type Config struct {
 	SocketAuth bool               // Require auth for Unix socket
 	HTTPAuth   bool               // Require auth for HTTP
 	Auth       auth.Authenticator // nil = no auth available
+
+	// SecurityHeaders for the web interface
+	SecurityHeaders SecurityHeadersConfig
 }
 
 type Server struct {
@@ -123,10 +141,35 @@ func (s *Server) buildHandler(authenticator auth.Authenticator, required bool) h
 
 	// Serve embedded frontend if available
 	if s.frontendFS != nil {
-		rootMux.Handle("/", spaFileServer(s.frontendFS))
+		rootMux.Handle("/", securityHeadersMiddleware(s.config.SecurityHeaders, spaFileServer(s.frontendFS)))
 	}
 
 	return rootMux
+}
+
+// securityHeadersMiddleware sets Content-Security-Policy and Strict-Transport-Security
+// headers for the web interface when the respective options are enabled.
+func securityHeadersMiddleware(cfg SecurityHeadersConfig, next http.Handler) http.Handler {
+	cspValue := cfg.CspValue
+	if cspValue == "" {
+		cspValue = defaultCspValue
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if cfg.CspEnabled {
+			w.Header().Set("Content-Security-Policy", cspValue)
+		}
+		if cfg.HstsEnabled {
+			hstsValue := fmt.Sprintf("max-age=%d", int(cfg.HstsMaxAge.Seconds()))
+			if cfg.HstsIncludeSubDomains {
+				hstsValue += "; includeSubDomains"
+			}
+			if cfg.HstsPreload {
+				hstsValue += "; preload"
+			}
+			w.Header().Set("Strict-Transport-Security", hstsValue)
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 // spaFileServer serves static files with SPA fallback to index.html.
