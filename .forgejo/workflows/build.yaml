@@ -11,10 +11,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Native - checkstyle, build, test
+      - name: Native - checkstyle, build
         shell: bash
         run: |
-          nix develop --command bash -c "make clean dependencies checkstyle build-all test-coverage"
+          nix develop --command bash -c "make clean dependencies checkstyle build-all"
 
       - name: Native - security scan
         shell: bash
@@ -26,6 +26,11 @@ jobs:
         with:
           name: grype.txt
           path: bin/grype.txt
+
+      - name: Native - test
+        shell: bash
+        run: |
+          nix develop --command bash -c "make test-coverage"
 
       - name: OCI - prepare
         uses: docker/setup-buildx-action@v3
