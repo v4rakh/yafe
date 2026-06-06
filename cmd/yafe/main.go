@@ -31,7 +31,7 @@ import (
 
 const (
 	Name    = "YaFE"
-	Version = "0.1.0"
+	Version = "0.1.1"
 
 	// Serve command flags
 	flagQueueDir      = "queue-dir"

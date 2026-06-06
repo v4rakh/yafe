@@ -22,7 +22,7 @@
       perSystem =
         { pkgs, self', ... }:
         let
-          version = "0.1.0";
+          version = "0.1.1";
           frontend = pkgs.stdenv.mkDerivation (finalAttrs: {
             pname = "yafe-ui";
             inherit version;
@@ -44,7 +44,7 @@
                 pnpmInstallFlags
                 ;
               fetcherVersion = 3;
-              hash = "sha256-+2nzW3TlJ6LcHUi951n/FVRuj57GySt6m753ZmArOUw=";
+              hash = "sha256-ja/v4SxXnD+QhG//sxSzNNP6grw9UhS9vTFSR1AUa+c=";
             };
 
             buildPhase = ''
