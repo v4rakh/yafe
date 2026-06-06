@@ -22,7 +22,7 @@
       perSystem =
         { pkgs, self', ... }:
         let
-          version = "0.1.1";
+          version = "0.1.2";
           frontend = pkgs.stdenv.mkDerivation (finalAttrs: {
             pname = "yafe-ui";
             inherit version;
