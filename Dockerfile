@@ -48,7 +48,7 @@ RUN useradd -u 65532 -g 0 -M -d /data nonroot && \
     chgrp -R 0 /data && \
     chmod -R g=u /data
 
-USER nonroot
+USER 65532:0
 WORKDIR /data
 
 # Expose HTTP port
