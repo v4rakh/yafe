@@ -5,6 +5,9 @@ in simple YAML files. Ideal for small CI/CD, deployment scripts, and other autom
 
 It's a single binary and features a full web interface.
 
+The main git repository is hosted at [https://git.myservermanager.com/varakh/yafe](https://git.myservermanager.com/varakh/yafe).
+Other repositories are mirrors and pull requests, issues, and planning are managed there.
+
 ## Install
 
 You can either **download the binary** for your operating system, use the provided **docker image** (see [container usage](#container)), or add yafe as **Nix flakes** input.
