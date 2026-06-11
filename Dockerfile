@@ -6,7 +6,8 @@ RUN apk --update upgrade && \
 
 WORKDIR /src/web
 COPY internal/frontend/app/package*.json ./
-RUN pnpm install
+COPY internal/frontend/app/pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 COPY internal/frontend/app/ ./
 RUN pnpm build
 
