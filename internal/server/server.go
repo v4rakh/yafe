@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"sort"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"git.myservermanager.com/varakh/yafe/internal/queue"
 	"git.myservermanager.com/varakh/yafe/internal/registry"
 	"git.myservermanager.com/varakh/yafe/internal/scheduler"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -144,7 +146,31 @@ func (s *Server) buildHandler(authenticator auth.Authenticator, required bool) h
 		rootMux.Handle("/", securityHeadersMiddleware(s.config.SecurityHeaders, spaFileServer(s.frontendFS)))
 	}
 
-	return rootMux
+	return recoveryMiddleware(rootMux)
+}
+
+// recoveryMiddleware catches panics, logs them with a stack trace, and returns a 500 JSON response.
+func recoveryMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rec := recover(); rec != nil {
+				panicErr := fmt.Errorf("%v", rec)
+				stackTrace := debug.Stack()
+
+				log.Error().
+					Err(panicErr).
+					Str(zerolog.ErrorStackFieldName, string(stackTrace)).
+					Msg("panic")
+
+				w.Header().Set("Content-Type", contentTypeJSON)
+				w.WriteHeader(http.StatusInternalServerError)
+				if err := json.NewEncoder(w).Encode(ErrorResponse{Error: "panic"}); err != nil {
+					log.Error().Err(err).Msg("Failed to encode JSON response")
+				}
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
 }
 
 // securityHeadersMiddleware sets Content-Security-Policy and Strict-Transport-Security

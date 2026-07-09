@@ -81,7 +81,7 @@ func (s *ShellStep) Execute(ctx context.Context, runID string, state *StateManag
 
 	defer func() {
 		if errRemove := os.Remove(scriptPath); errRemove != nil {
-			log.Warn().Msgf("Cleanup for temporary shell step script '%s' failed: %v", scriptPath, errRemove)
+			log.Warn().Err(errRemove).Msgf("Cleanup for temporary shell step script '%s' failed", scriptPath)
 		} else {
 			log.Debug().Msgf("Cleaned up temporary shell step script '%s'", scriptPath)
 		}
@@ -89,7 +89,7 @@ func (s *ShellStep) Execute(ctx context.Context, runID string, state *StateManag
 
 	defer func(f *os.File) {
 		if errClose := f.Close(); errClose != nil {
-			log.Error().Msgf("Close temporary shell step script: %v", errClose)
+			log.Error().Err(errClose).Msg("Close temporary shell step script")
 		}
 	}(scriptFile)
 

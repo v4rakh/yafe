@@ -135,7 +135,7 @@ func (e *Engine) Run(ctx context.Context, flow *Flow, opts ...RunOption) error {
 	}
 	defer func() {
 		if err := state.Cleanup(); err != nil {
-			log.Error().Msgf("State cleanup failed: %v", err)
+			log.Error().Err(err).Msg("State cleanup failed")
 		}
 	}()
 
@@ -164,7 +164,7 @@ func (e *Engine) Run(ctx context.Context, flow *Flow, opts ...RunOption) error {
 	defer func(RunsOn RunsOn) {
 		err := RunsOn.Teardown()
 		if err != nil {
-			log.Error().Msgf("%v", fmt.Errorf("%w: %w", ErrRunsOnTeardown, err))
+			log.Error().Err(fmt.Errorf("%w: %w", ErrRunsOnTeardown, err)).Msg("RunsOn teardown failed")
 		}
 	}(flow.RunsOn)
 
