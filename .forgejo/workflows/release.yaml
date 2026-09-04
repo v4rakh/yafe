@@ -37,7 +37,7 @@ jobs:
           docker buildx build --push --no-cache -t git.myservermanager.com/varakh/yafe:${{ inputs.version }} -t git.myservermanager.com/varakh/yafe:latest -f Dockerfile .
 
       - name: Upload artifacts
-        uses: ./.forgejo/actions/forgejo-release
+        uses: https://git.myservermanager.com/msm/forgejo-actions-forgejo-release@main
         with:
           url: ${{ env.FORGE_URL }}
           repo: ${{ env.FORGE_REPOSITORY_NAME }}
