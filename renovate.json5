@@ -31,5 +31,6 @@
     "local>msm/renovate-presets//presets/go-recommended-mod-post.json",
     "packages:eslint",
     "packages:tslint",
+    "local>msm/renovate-presets//presets/github-actions-recommended.json",
   ]
 }
