@@ -4,7 +4,7 @@ jobs:
     runs-on: native
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Native - checkstyle, build
         shell: bash
