@@ -22,7 +22,7 @@ jobs:
           nix develop --command bash -c "make clean dependencies build-all"
 
       - name: OCI - Login
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.FORGE_FQDN }}
           username: ${{ secrets.FORGE_USER }}
