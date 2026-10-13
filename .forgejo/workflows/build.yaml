@@ -4,7 +4,7 @@ jobs:
     runs-on: native
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.4.0
 
       - name: Native - checkstyle, build
         shell: bash
@@ -17,7 +17,7 @@ jobs:
           nix develop --command bash -c "make scan"
 
       - name: Native - archive scan results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.2.2
         with:
           name: grype.txt
           path: bin/grype.txt
@@ -28,7 +28,7 @@ jobs:
           nix develop --command bash -c "make test-coverage"
 
       - name: OCI - prepare
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v4.4.1
 
       - name: OCI - build
         shell: bash
