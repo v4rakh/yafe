@@ -44,7 +44,7 @@
                 pnpmInstallFlags
                 ;
               fetcherVersion = 3;
-              hash = "sha256-ja/v4SxXnD+QhG//sxSzNNP6grw9UhS9vTFSR1AUa+c=";
+              hash = "sha256-a7w+CzXU7HTysd1umNsuiEbbq//5YGy/mPbZum/EL5E=";
             };
 
             buildPhase = ''
@@ -72,7 +72,7 @@
               "-s"
               "-w"
             ];
-            vendorHash = "sha256-zCCH0h9n+Z7fWOJ7d8zFv4OmmNna3pzPPZ41DPOJ9dI=";
+            vendorHash = "sha256-5upql2DVUNOuMUvAbSFPF/jlwVQrzxTg8rShvEw1Zy0=";
 
             preBuild = ''
               mkdir -p internal/frontend/app
