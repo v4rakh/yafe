@@ -15,7 +15,7 @@ You can either **download the binary** for your operating system, use the provid
 ```nix
 # flake.nix
 {
-    inputs.yafe.url = "git+https://git.myservermanager.com/varakh/yafe?ref=refs/tags/latest";
+    inputs.yafe.url = "git+https://git.myservermanager.com/varakh/yafe?ref=refs/tags/v0.1.3";
 }
 ```
 
