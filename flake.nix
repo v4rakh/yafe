@@ -34,17 +34,14 @@
               pnpmConfigHook
             ];
 
-            pnpmInstallFlags = [ "--frozen-lockfile" ];
-
             pnpmDeps = pkgs.fetchPnpmDeps {
               inherit (finalAttrs)
                 pname
                 version
                 src
-                pnpmInstallFlags
                 ;
-              fetcherVersion = 3;
-              hash = "sha256-a7w+CzXU7HTysd1umNsuiEbbq//5YGy/mPbZum/EL5E=";
+              fetcherVersion = 4;
+              hash = "sha256-IdJMTRg7spcPlkKfrbFVTvG9RwvKFuIaAVJr/owjruc=";
             };
 
             buildPhase = ''
